@@ -1,0 +1,19 @@
+{
+    "appKeys": {},
+    "capabilities": [
+        ""
+    ],
+    "companyName": "Alexis Rico",
+    "longName": "Geek The Time",
+    "projectType": "native",
+    "resources": {
+        "media": []
+    },
+    "shortName": "GeekTheTime",
+    "uuid": "1c977f4c-d7b2-4632-987a-1e1e01834759",
+    "versionCode": 1,
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": true
+    }
+}
