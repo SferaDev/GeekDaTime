@@ -22,11 +22,81 @@ static Window *s_main_window;
 static TextLayer *s_time_layer;
 static TextLayer *s_quote_layer;
 
-// Main void
-int main(void) {
-  init();
-  app_event_loop();
-  deinit();
+static void update_time() {
+  // Get a tm structure
+  time_t temp = time(NULL); 
+  struct tm *tick_time = localtime(&temp);
+
+  // Create a long-lived buffer
+  static char buffer[] = "00:00";
+
+  // Write the current hours and minutes into the buffer
+  if(clock_is_24h_style() == true) { //TODO: 12/24 Persistent data + Mobile
+    //Use 2h hour format
+    strftime(buffer, sizeof("00:00"), "%H:%M", tick_time);
+  } else {
+    //Use 12 hour format
+    strftime(buffer, sizeof("00:00"), "%I:%M", tick_time);
+  }
+
+  // Display this time on the TextLayer
+  text_layer_set_text(s_time_layer, buffer);
+}
+
+static void update_quote() {
+  //TODO: Parse file and get random quote
+}
+
+void create_time_layer(Window *window) {
+  // Create time TextLayer
+  s_time_layer = text_layer_create(GRect(0, 30, 144, 50)); //GRect = Rectangle where everything is shown.
+  text_layer_set_background_color(s_time_layer, GColorClear);
+  text_layer_set_text_color(s_time_layer, GColorBlack);
+  text_layer_set_text(s_time_layer, "00:00");
+
+  // Improve the layout to be more like a watchface
+  text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD)); //Fonts
+  text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter); //Alignment
+
+  // Add it as a child layer to the Window's root layer
+  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
+  
+  // Make sure the time is displayed from the start
+  update_time();
+}
+
+void create_quote_layer(Window *window) {
+  // Create time TextLayer
+  s_quote_layer = text_layer_create(GRect(0, 90, 144, 50)); //TODO: Fix rectangle position of quote
+  text_layer_set_background_color(s_quote_layer, GColorClear);
+  text_layer_set_text_color(s_quote_layer, GColorBlack);
+  text_layer_set_text(s_quote_layer, "May The Force Be With You");
+
+  // Improve the layout to be more like a watchface
+  text_layer_set_font(s_quote_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24)); //TODO: Reduce Font
+  text_layer_set_text_alignment(s_quote_layer, GTextAlignmentCenter); //Alignment
+
+  // Add it as a child layer to the Window's root layer
+  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_quote_layer)); //TODO: Root layer time?
+  
+  // Make sure the time is displayed from the start
+  update_quote();
+}
+
+// Load and Unload
+static void main_window_load(Window *window) {
+  create_time_layer(window);
+  create_quote_layer(window);
+}
+
+static void main_window_unload(Window *window) {
+  // Destroy TextLayer
+  text_layer_destroy(s_time_layer);
+  text_layer_destroy(s_quote_layer);
+}
+
+static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+  update_time();
 }
 
 static void init() {
@@ -51,79 +121,9 @@ static void deinit() {
   window_destroy(s_main_window);
 }
 
-// Load and Unload
-static void main_window_load(Window *window) {
-  create_time_layer();
-  create_quote_layer();
-}
-
-static void main_window_unload(Window *window) {
-  // Destroy TextLayer
-  text_layer_destroy(s_time_layer);
-  text_layer_destroy(s_quote_layer);
-}
-
-static void create_time_layer() {
-  // Create time TextLayer
-  s_time_layer = text_layer_create(GRect(0, 55, 144, 50)); //GRect = Rectangle where everything is shown.
-  text_layer_set_background_color(s_time_layer, GColorClear);
-  text_layer_set_text_color(s_time_layer, GColorBlack);
-  text_layer_set_text(s_time_layer, "00:00");
-
-  // Improve the layout to be more like a watchface
-  text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD)); //Fonts
-  text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter); //Alignment
-
-  // Add it as a child layer to the Window's root layer
-  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
-  
-  // Make sure the time is displayed from the start
-  update_time();
-}
-
-static void create_quote_layer() {
-  // Create time TextLayer
-  s_quote_layer = text_layer_create(GRect(0, 55, 144, 50)); //TODO: Fix rectangle position of quote
-  text_layer_set_background_color(s_quote_layer, GColorClear);
-  text_layer_set_text_color(s_quote_layer, GColorBlack);
-  text_layer_set_text(s_quote_layer, "MTFBWY");
-
-  // Improve the layout to be more like a watchface
-  text_layer_set_font(s_quote_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD)); //TODO: Reduce Font
-  text_layer_set_text_alignment(s_quote_layer, GTextAlignmentCenter); //Alignment
-
-  // Add it as a child layer to the Window's root layer
-  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_quote_layer)); //TODO: Root layer time?
-  
-  // Make sure the time is displayed from the start
-  update_quote();
-}
-
-static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  update_time();
-}
-
-static void update_time() {
-  // Get a tm structure
-  time_t temp = time(NULL); 
-  struct tm *tick_time = localtime(&temp);
-
-  // Create a long-lived buffer
-  static char buffer[] = "00:00";
-
-  // Write the current hours and minutes into the buffer
-  if(clock_is_24h_style() == true) { //TODO: 12/24 Persistent data + Mobile
-    //Use 2h hour format
-    strftime(buffer, sizeof("00:00"), "%H:%M", tick_time);
-  } else {
-    //Use 12 hour format
-    strftime(buffer, sizeof("00:00"), "%I:%M", tick_time);
-  }
-
-  // Display this time on the TextLayer
-  text_layer_set_text(s_time_layer, buffer);
-}
-
-static void update_quote() {
-  //TODO: Parse file and get random quote
+// Main void
+int main(void) {
+  init();
+  app_event_loop();
+  deinit();
 }
