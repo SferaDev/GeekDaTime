@@ -65,7 +65,7 @@ static void update_time() {
 
 void create_bt_layer(Window *window) {
   // Create time TextLayer
-  s_bt_layer = text_layer_create(GRect(7, 0, 137, 50)); //TODO
+  s_bt_layer = text_layer_create(GRect(7, 0, 137, 50));
   text_layer_set_background_color(s_bt_layer, GColorClear);
   text_layer_set_text_color(s_bt_layer, GColorBlack);
 
@@ -93,7 +93,7 @@ void create_battery_layer(Window *window) {
 
 void create_time_layer(Window *window) {
   // Create time TextLayer
-  s_time_layer = text_layer_create(GRect(0, 30, 144, 50)); //GRect = Rectangle where everything is shown.
+  s_time_layer = text_layer_create(GRect(0, 40, 144, 50));
   text_layer_set_background_color(s_time_layer, GColorClear);
   text_layer_set_text_color(s_time_layer, GColorBlack);
   text_layer_set_text(s_time_layer, "00:00");
@@ -111,7 +111,7 @@ void create_time_layer(Window *window) {
 
 void create_quote_layer(Window *window) {
   // Create time TextLayer
-  s_quote_layer = text_layer_create(GRect(0, 90, 144, 50)); //TODO: Fix rectangle position of quote
+  s_quote_layer = text_layer_create(GRect(0, 95, 144, 50));
   text_layer_set_background_color(s_quote_layer, GColorClear);
   text_layer_set_text_color(s_quote_layer, GColorBlack);
   text_layer_set_text(s_quote_layer, "May The Force Be With You");
