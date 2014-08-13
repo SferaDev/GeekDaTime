@@ -19,9 +19,14 @@
 
 // Create Window, Time and Quote
 static Window *s_main_window;
+static TextLayer *s_bt_layer;
 static TextLayer *s_time_layer;
 static TextLayer *s_battery_layer;
 static TextLayer *s_quote_layer;
+
+static void update_bt(bool connected) {
+  text_layer_set_text(s_bt_layer, connected ? "BT ON" : "BT OFF");
+}
 
 static void update_battery(BatteryChargeState charge_state) {
   static char battery_text[] = "100%";
@@ -58,9 +63,23 @@ static void update_time() {
   //TODO: Parse file and get random quote
 } Not yet **/
 
+void create_bt_layer(Window *window) {
+  // Create time TextLayer
+  s_bt_layer = text_layer_create(GRect(7, 0, 137, 50)); //TODO
+  text_layer_set_background_color(s_bt_layer, GColorClear);
+  text_layer_set_text_color(s_bt_layer, GColorBlack);
+
+  // Improve the layout to be more like a watchface
+  text_layer_set_font(s_bt_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18)); //TODO
+  text_layer_set_text_alignment(s_bt_layer, GTextAlignmentLeft); //Alignment
+
+  // Add it as a child layer to the Window's root layer
+  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_bt_layer));
+}
+
 void create_battery_layer(Window *window) {
   // Create time TextLayer
-  s_battery_layer = text_layer_create(GRect(0, 0, 137, 50)); //TODO
+  s_battery_layer = text_layer_create(GRect(0, 0, 137, 50));
   text_layer_set_background_color(s_battery_layer, GColorClear);
   text_layer_set_text_color(s_battery_layer, GColorBlack);
 
@@ -110,6 +129,7 @@ void create_quote_layer(Window *window) {
 
 // Load and Unload
 static void main_window_load(Window *window) {
+  create_bt_layer(window);
   create_time_layer(window);
   create_battery_layer(window);
   create_quote_layer(window);
@@ -117,12 +137,14 @@ static void main_window_load(Window *window) {
 
 static void main_window_unload(Window *window) {
   // Destroy TextLayer
+  text_layer_destroy(s_bt_layer);
   text_layer_destroy(s_time_layer);
   text_layer_destroy(s_battery_layer);
   text_layer_destroy(s_quote_layer);
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+  update_bt(bluetooth_connection_service_peek());
   update_battery(battery_state_service_peek());
   update_time();
 }
@@ -141,14 +163,16 @@ static void init() {
   window_stack_push(s_main_window, true);
   
   // Register services
-  tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+  bluetooth_connection_service_subscribe(update_bt);
   battery_state_service_subscribe(update_battery);
+  tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
 }
 
 static void deinit() {
   // Destroy services
+  bluetooth_connection_service_unsubscribe();
+  battery_state_service_unsubscribe();
   tick_timer_service_unsubscribe();
-  battery_state_service_unsubscribe();  
   // Destroy Window
   window_destroy(s_main_window);
 }
