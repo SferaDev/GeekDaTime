@@ -7,7 +7,13 @@
     "longName": "Geek The Time",
     "projectType": "native",
     "resources": {
-        "media": []
+        "media": [
+            {
+                "file": "data/quotes.txt",
+                "name": "QUOTES_IDENTIFIER",
+                "type": "raw"
+            }
+        ]
     },
     "shortName": "GeekTheTime",
     "uuid": "1c977f4c-d7b2-4632-987a-1e1e01834759",

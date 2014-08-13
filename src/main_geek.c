@@ -59,9 +59,14 @@ static void update_time() {
   text_layer_set_text(s_time_layer, buffer);
 }
 
-/**static void update_quote() {
+static void update_quote() {
   //TODO: Parse file and get random quote
-} Not yet **/
+  /*
+  Two options:
+  - Add a resource on WatchFace
+  - Update dinamycally Quotes from Companion App
+  */
+}
 
 void create_bt_layer(Window *window) {
   // Create time TextLayer
