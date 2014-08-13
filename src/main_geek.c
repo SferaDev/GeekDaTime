@@ -20,7 +20,18 @@
 // Create Window, Time and Quote
 static Window *s_main_window;
 static TextLayer *s_time_layer;
+static TextLayer *s_battery_layer;
 static TextLayer *s_quote_layer;
+
+static void update_battery(BatteryChargeState charge_state) {
+  static char battery_text[] = "100%";
+  if (charge_state.is_charging) {
+    text_layer_set_text(s_battery_layer, "Charging");
+  } else {
+    snprintf(battery_text, sizeof(battery_text), "%d%%", charge_state.charge_percent);
+    text_layer_set_text(s_battery_layer, battery_text);
+  }
+}
 
 static void update_time() {
   // Get a tm structure
@@ -43,8 +54,22 @@ static void update_time() {
   text_layer_set_text(s_time_layer, buffer);
 }
 
-static void update_quote() {
+/**static void update_quote() {
   //TODO: Parse file and get random quote
+} Not yet **/
+
+void create_battery_layer(Window *window) {
+  // Create time TextLayer
+  s_battery_layer = text_layer_create(GRect(0, 0, 140, 50)); //TODO
+  text_layer_set_background_color(s_battery_layer, GColorClear);
+  text_layer_set_text_color(s_battery_layer, GColorBlack);
+
+  // Improve the layout to be more like a watchface
+  text_layer_set_font(s_battery_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18)); //TODO
+  text_layer_set_text_alignment(s_battery_layer, GTextAlignmentRight); //Alignment
+
+  // Add it as a child layer to the Window's root layer
+  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_battery_layer));
 }
 
 void create_time_layer(Window *window) {
@@ -77,25 +102,28 @@ void create_quote_layer(Window *window) {
   text_layer_set_text_alignment(s_quote_layer, GTextAlignmentCenter); //Alignment
 
   // Add it as a child layer to the Window's root layer
-  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_quote_layer)); //TODO: Root layer time?
+  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_quote_layer));
   
   // Make sure the time is displayed from the start
-  update_quote();
+  //update_quote(); Not yet
 }
 
 // Load and Unload
 static void main_window_load(Window *window) {
   create_time_layer(window);
+  create_battery_layer(window);
   create_quote_layer(window);
 }
 
 static void main_window_unload(Window *window) {
   // Destroy TextLayer
   text_layer_destroy(s_time_layer);
+  text_layer_destroy(s_battery_layer);
   text_layer_destroy(s_quote_layer);
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+  update_battery(battery_state_service_peek());
   update_time();
 }
 
@@ -112,11 +140,15 @@ static void init() {
   // Show the Window on the watch, with animated=true
   window_stack_push(s_main_window, true);
   
-  // Register with TickTimerService
+  // Register services
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+  battery_state_service_subscribe(update_battery);
 }
 
 static void deinit() {
+  // Destroy services
+  tick_timer_service_unsubscribe();
+  battery_state_service_unsubscribe();  
   // Destroy Window
   window_destroy(s_main_window);
 }
