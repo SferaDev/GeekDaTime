@@ -99,7 +99,7 @@ void create_time_layer(Window *window) {
   text_layer_set_text(s_time_layer, "00:00");
 
   // Improve the layout to be more like a watchface
-  text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD)); //Fonts
+  text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_LIGHT)); //Fonts
   text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter); //Alignment
 
   // Add it as a child layer to the Window's root layer
