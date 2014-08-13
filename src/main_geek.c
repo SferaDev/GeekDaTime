@@ -60,7 +60,7 @@ static void update_time() {
 
 void create_battery_layer(Window *window) {
   // Create time TextLayer
-  s_battery_layer = text_layer_create(GRect(0, 0, 140, 50)); //TODO
+  s_battery_layer = text_layer_create(GRect(0, 0, 137, 50)); //TODO
   text_layer_set_background_color(s_battery_layer, GColorClear);
   text_layer_set_text_color(s_battery_layer, GColorBlack);
 
