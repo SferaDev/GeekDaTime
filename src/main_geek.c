@@ -22,7 +22,9 @@ static Window *s_main_window;
 static TextLayer *s_bt_layer, *s_time_layer, *s_battery_layer, *s_quote_layer;
 enum {
   KEY_QUOTE = 0,
-  KEY_BT = 1,
+  KEY_SHOW_QUOTE = 1,
+  KEY_SHOW_BT = 2,
+  KEY_SHOW_BATTERY = 3,
 };
 
 static void update_bt(bool connected) {
@@ -70,7 +72,7 @@ void process_tuple(Tuple *t)
   int key = t->key;
  
   //Get integer value, if present
-  int value = t->value->int32;
+  int int_value = t->value->int32;
  
   //Get string value, if present
   char *string_value = t->value->cstring;
@@ -78,7 +80,28 @@ void process_tuple(Tuple *t)
   //Decide what to do
   switch(key) {
     case KEY_QUOTE:
-      update_quote(string_value);
+      update_quote(string_value); //TODO: Persistent
+      break;
+    case KEY_SHOW_QUOTE:
+      if (strcmp(string_value, "false") == 0) {
+        update_quote("");
+      } else {
+        update_quote("WIP Persistent"); //TODO: Check persistent
+      }
+      break;
+    case KEY_SHOW_BT:
+      if (strcmp(string_value, "false") == 0) {
+        text_layer_set_text(s_bt_layer, "");
+      } else {
+        update_bt(bluetooth_connection_service_peek());
+      }
+      break;
+    case KEY_SHOW_BATTERY:
+      if (strcmp(string_value, "false") == 0) {
+        text_layer_set_text(s_battery_layer, "");
+      } else {
+        update_battery(battery_state_service_peek());
+      }
       break;
   }
 }
@@ -88,6 +111,7 @@ void create_bt_layer(Window *window) {
   s_bt_layer = text_layer_create(GRect(7, 0, 137, 50));
   text_layer_set_background_color(s_bt_layer, GColorClear);
   text_layer_set_text_color(s_bt_layer, GColorBlack);
+  update_bt(bluetooth_connection_service_peek());
 
   // Improve the layout to be more like a watchface
   text_layer_set_font(s_bt_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18)); //TODO: Themes
@@ -102,6 +126,7 @@ void create_battery_layer(Window *window) {
   s_battery_layer = text_layer_create(GRect(0, 0, 137, 50));
   text_layer_set_background_color(s_battery_layer, GColorClear);
   text_layer_set_text_color(s_battery_layer, GColorBlack);
+  update_battery(battery_state_service_peek());
 
   // Improve the layout to be more like a watchface
   text_layer_set_font(s_battery_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18)); //TODO: Themes
@@ -173,8 +198,12 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  update_bt(bluetooth_connection_service_peek());
-  update_battery(battery_state_service_peek());
+  if (strcmp(text_layer_get_text(s_bt_layer), "") != 0) {
+    update_bt(bluetooth_connection_service_peek());
+  }
+  if (strcmp(text_layer_get_text(s_battery_layer), "") != 0) {
+    update_battery(battery_state_service_peek());
+  }
   update_time();
 }
 
