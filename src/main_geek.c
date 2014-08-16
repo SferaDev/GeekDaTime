@@ -47,7 +47,7 @@ static void update_time() {
   static char buffer[] = "00:00";
 
   // Write the current hours and minutes into the buffer
-  if(clock_is_24h_style() == true) { //TODO: 12/24 Persistent data + Mobile
+  if(clock_is_24h_style() == true) {
     //Use 2h hour format
     strftime(buffer, sizeof("00:00"), "%H:%M", tick_time);
   } else {
@@ -60,12 +60,7 @@ static void update_time() {
 }
 
 static void update_quote() {
-  //TODO: Parse file and get random quote
-  /*
-  Two options:
-  - Add a resource on WatchFace
-  - Update dinamycally Quotes from Companion App
-  */
+  //TODO: AppMessage to receive current quote
 }
 
 void create_bt_layer(Window *window) {
@@ -75,8 +70,8 @@ void create_bt_layer(Window *window) {
   text_layer_set_text_color(s_bt_layer, GColorBlack);
 
   // Improve the layout to be more like a watchface
-  text_layer_set_font(s_bt_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18)); //TODO
-  text_layer_set_text_alignment(s_bt_layer, GTextAlignmentLeft); //Alignment
+  text_layer_set_font(s_bt_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18)); //TODO: Themes
+  text_layer_set_text_alignment(s_bt_layer, GTextAlignmentLeft); //TODO: Themes
 
   // Add it as a child layer to the Window's root layer
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_bt_layer));
@@ -89,8 +84,8 @@ void create_battery_layer(Window *window) {
   text_layer_set_text_color(s_battery_layer, GColorBlack);
 
   // Improve the layout to be more like a watchface
-  text_layer_set_font(s_battery_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18)); //TODO
-  text_layer_set_text_alignment(s_battery_layer, GTextAlignmentRight); //Alignment
+  text_layer_set_font(s_battery_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18)); //TODO: Themes
+  text_layer_set_text_alignment(s_battery_layer, GTextAlignmentRight); //TODO: Themes
 
   // Add it as a child layer to the Window's root layer
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_battery_layer));
@@ -104,8 +99,8 @@ void create_time_layer(Window *window) {
   text_layer_set_text(s_time_layer, "00:00");
 
   // Improve the layout to be more like a watchface
-  text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_LIGHT)); //Fonts
-  text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter); //Alignment
+  text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_LIGHT)); //TODO:Themes
+  text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter); //TODO: Themes
 
   // Add it as a child layer to the Window's root layer
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
@@ -122,14 +117,11 @@ void create_quote_layer(Window *window) {
   text_layer_set_text(s_quote_layer, "May The Force Be With You");
 
   // Improve the layout to be more like a watchface
-  text_layer_set_font(s_quote_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24)); //TODO: Reduce Font
-  text_layer_set_text_alignment(s_quote_layer, GTextAlignmentCenter); //Alignment
+  text_layer_set_font(s_quote_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24)); //TODO: Themes
+  text_layer_set_text_alignment(s_quote_layer, GTextAlignmentCenter); //TODO: Themes
 
   // Add it as a child layer to the Window's root layer
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_quote_layer));
-  
-  // Make sure the time is displayed from the start
-  //update_quote(); Not yet
 }
 
 // Load and Unload
