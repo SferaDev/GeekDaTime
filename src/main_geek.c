@@ -19,10 +19,11 @@
 
 // Create Window, Time and Quote
 static Window *s_main_window;
-static TextLayer *s_bt_layer;
-static TextLayer *s_time_layer;
-static TextLayer *s_battery_layer;
-static TextLayer *s_quote_layer;
+static TextLayer *s_bt_layer, *s_time_layer, *s_battery_layer, *s_quote_layer;
+enum {
+  KEY_QUOTE = 0,
+  KEY_BT = 1,
+};
 
 static void update_bt(bool connected) {
   text_layer_set_text(s_bt_layer, connected ? "BT ON" : "BT OFF");
@@ -59,8 +60,27 @@ static void update_time() {
   text_layer_set_text(s_time_layer, buffer);
 }
 
-static void update_quote() {
-  //TODO: AppMessage to receive current quote
+static void update_quote(char *quote) {
+    text_layer_set_text(s_quote_layer, quote);
+}
+
+void process_tuple(Tuple *t)
+{
+  //Get key
+  int key = t->key;
+ 
+  //Get integer value, if present
+  int value = t->value->int32;
+ 
+  //Get string value, if present
+  char *string_value = t->value->cstring;
+ 
+  //Decide what to do
+  switch(key) {
+    case KEY_QUOTE:
+      update_quote(string_value);
+      break;
+  }
 }
 
 void create_bt_layer(Window *window) {
@@ -140,6 +160,18 @@ static void main_window_unload(Window *window) {
   text_layer_destroy(s_quote_layer);
 }
 
+static void in_received_handler(DictionaryIterator *iter, void *context) {
+  (void) context;
+  //Get data
+  Tuple *t = dict_read_first(iter);
+  while(t != NULL)
+  {
+    process_tuple(t);
+    //Get next
+    t = dict_read_next(iter);
+  }
+}
+
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_bt(bluetooth_connection_service_peek());
   update_battery(battery_state_service_peek());
@@ -156,13 +188,15 @@ static void init() {
     .unload = main_window_unload
   });
 
-  // Show the Window on the watch, with animated=true
-  window_stack_push(s_main_window, true);
-  
   // Register services
   bluetooth_connection_service_subscribe(update_bt);
   battery_state_service_subscribe(update_battery);
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+  app_message_register_inbox_received(in_received_handler);
+  app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+  
+  // Show the Window on the watch, with animated=true
+  window_stack_push(s_main_window, true);
 }
 
 static void deinit() {
