@@ -21,23 +21,33 @@
 static Window *s_main_window;
 static TextLayer *s_bt_layer, *s_time_layer, *s_battery_layer, *s_quote_layer;
 enum {
-  KEY_QUOTE = 0,
-  KEY_SHOW_QUOTE = 1,
+  KEY_TAG = 0,
+  KEY_WIP = 1,
   KEY_SHOW_BT = 2,
   KEY_SHOW_BATTERY = 3,
 };
 
 static void update_bt(bool connected) {
-  text_layer_set_text(s_bt_layer, connected ? "BT ON" : "BT OFF");
+  if (persist_read_int(KEY_SHOW_BT) == 1) {
+    text_layer_set_text(s_bt_layer, connected ? "BT ON" : "BT OFF");
+  } else {
+    text_layer_set_text(s_bt_layer, "");
+  }
 }
 
 static void update_battery(BatteryChargeState charge_state) {
   static char battery_text[] = "100%";
+  char *string;
   if (charge_state.is_charging) {
-    text_layer_set_text(s_battery_layer, "Charging");
+    string = "Charging";
   } else {
     snprintf(battery_text, sizeof(battery_text), "%d%%", charge_state.charge_percent);
-    text_layer_set_text(s_battery_layer, battery_text);
+    string = battery_text;
+  }
+  if (persist_read_int(KEY_SHOW_BATTERY) == 1) {
+    text_layer_set_text(s_battery_layer, string);
+  } else {
+    text_layer_set_text(s_battery_layer, "");
   }
 }
 
@@ -62,7 +72,9 @@ static void update_time() {
   text_layer_set_text(s_time_layer, buffer);
 }
 
-static void update_quote(char *quote) {
+static void update_quote() {
+    char *quote = "WIP";
+    persist_read_string(KEY_TAG, quote, 40);
     text_layer_set_text(s_quote_layer, quote);
 }
 
@@ -79,29 +91,17 @@ void process_tuple(Tuple *t)
  
   //Decide what to do
   switch(key) {
-    case KEY_QUOTE:
-      update_quote(string_value); //TODO: Persistent
-      break;
-    case KEY_SHOW_QUOTE:
-      if (strcmp(string_value, "false") == 0) {
-        update_quote("");
-      } else {
-        update_quote("WIP Persistent"); //TODO: Check persistent
-      }
+    case KEY_TAG:
+      persist_write_string(KEY_TAG, string_value);
+      update_quote();
       break;
     case KEY_SHOW_BT:
-      if (strcmp(string_value, "false") == 0) {
-        text_layer_set_text(s_bt_layer, "");
-      } else {
-        update_bt(bluetooth_connection_service_peek());
-      }
+      persist_write_int(KEY_SHOW_BT, int_value);
+      update_bt(bluetooth_connection_service_peek());
       break;
     case KEY_SHOW_BATTERY:
-      if (strcmp(string_value, "false") == 0) {
-        text_layer_set_text(s_battery_layer, "");
-      } else {
-        update_battery(battery_state_service_peek());
-      }
+      persist_write_int(KEY_SHOW_BATTERY, int_value);
+      update_battery(battery_state_service_peek());
       break;
   }
 }
@@ -198,13 +198,10 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  if (strcmp(text_layer_get_text(s_bt_layer), "") != 0) {
-    update_bt(bluetooth_connection_service_peek());
-  }
-  if (strcmp(text_layer_get_text(s_battery_layer), "") != 0) {
-    update_battery(battery_state_service_peek());
-  }
+  update_bt(bluetooth_connection_service_peek());
+  update_battery(battery_state_service_peek());
   update_time();
+  update_quote();
 }
 
 static void init() {
