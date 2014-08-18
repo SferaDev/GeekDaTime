@@ -32,13 +32,11 @@ static void update_bt(bool connected) {
 }
 
 static void update_battery(BatteryChargeState charge_state) {
-  static char battery_text[] = "100%";
-  char *string_battery;
+  char *string_battery = "100%";
   if (charge_state.is_charging) {
     string_battery = "Charging";
   } else {
-    snprintf(battery_text, sizeof(battery_text), "%d%%", charge_state.charge_percent);
-    string_battery = battery_text;
+    snprintf(string_battery, 40, "%d%%", charge_state.charge_percent);
   }
   text_layer_set_text(s_battery_layer, string_battery);
 }
