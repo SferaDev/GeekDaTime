@@ -19,11 +19,11 @@
 
 // Create Window, Time and Quote
 static Window *s_main_window;
-static TextLayer *s_bt_layer;
-static TextLayer *s_time_layer;
-static TextLayer *s_battery_layer;
-static TextLayer *s_tag_layer;
-char *tag;
+static TextLayer *s_time_layer, *s_bt_layer, *s_battery_layer, *s_tag_layer;
+char tag[40];
+enum {
+  KEY_TAG = 0,
+};
 
 static void update_time() {
   // Get a tm structure
@@ -46,8 +46,11 @@ static void update_time() {
   text_layer_set_text(s_time_layer, buffer);
 }
 
-static void update_tag(char *string_tag) {
-  text_layer_set_text(s_tag_layer, string_tag);
+static void update_tag() {
+  if (persist_exists(KEY_TAG) == true) {
+    persist_read_string(KEY_TAG, tag, 40);
+  }
+  text_layer_set_text(s_tag_layer, tag);
 }
 
 static void update_bt(bool connected) {
@@ -59,9 +62,15 @@ static void update_battery(BatteryChargeState charge_state) {
   if (charge_state.is_charging) {
     string_battery = "Charging";
   } else {
-    snprintf(string_battery, sizeof(string_battery), "%d%%", charge_state.charge_percent);
+    snprintf(string_battery, 20, "%d%%", charge_state.charge_percent);
   }
   text_layer_set_text(s_battery_layer, string_battery);
+}
+
+void doMagicalStuff(Tuple *t) {
+  char *string_value = t->value->cstring;
+  persist_write_string(KEY_TAG, string_value);
+  update_tag();
 }
 
 void create_bt_layer(Window *window) {
@@ -121,8 +130,6 @@ void create_tag_layer(Window *window) {
 
   // Add it as a child layer to the Window's root layer
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_tag_layer));
-
-  tag = "May The Force Be With You";
 }
 
 // Load and Unload
@@ -144,8 +151,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
   Tuple *t = dict_read_first(iter);
   if(t)
   {
-    tag = t->value->cstring;
-    update_tag(tag);
+    doMagicalStuff(t);
   }
 }
 
