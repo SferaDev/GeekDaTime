@@ -28,27 +28,19 @@ enum {
 };
 
 static void update_bt(bool connected) {
-  if (persist_read_int(KEY_SHOW_BT) == 1) {
-    text_layer_set_text(s_bt_layer, connected ? "BT ON" : "BT OFF");
-  } else {
-    text_layer_set_text(s_bt_layer, "");
-  }
+  text_layer_set_text(s_bt_layer, connected ? "BT ON" : "BT OFF");
 }
 
 static void update_battery(BatteryChargeState charge_state) {
   static char battery_text[] = "100%";
-  char *string;
+  char *string_battery;
   if (charge_state.is_charging) {
-    string = "Charging";
+    string_battery = "Charging";
   } else {
     snprintf(battery_text, sizeof(battery_text), "%d%%", charge_state.charge_percent);
-    string = battery_text;
+    string_battery = battery_text;
   }
-  if (persist_read_int(KEY_SHOW_BATTERY) == 1) {
-    text_layer_set_text(s_battery_layer, string);
-  } else {
-    text_layer_set_text(s_battery_layer, "");
-  }
+  text_layer_set_text(s_battery_layer, string_battery);
 }
 
 static void update_time() {
@@ -73,37 +65,17 @@ static void update_time() {
 }
 
 static void update_quote() {
-    char *quote = "WIP";
-    persist_read_string(KEY_TAG, quote, 40);
-    text_layer_set_text(s_quote_layer, quote);
+    char *string_quote = "WIP";
+    persist_read_string(KEY_TAG, string_quote, 40);
+    text_layer_set_text(s_quote_layer, string_quote);
 }
 
 void process_tuple(Tuple *t)
 {
-  //Get key
   int key = t->key;
- 
-  //Get integer value, if present
-  int int_value = t->value->int32;
- 
-  //Get string value, if present
   char *string_value = t->value->cstring;
- 
-  //Decide what to do
-  switch(key) {
-    case KEY_TAG:
-      persist_write_string(KEY_TAG, string_value);
-      update_quote();
-      break;
-    case KEY_SHOW_BT:
-      persist_write_int(KEY_SHOW_BT, int_value);
-      update_bt(bluetooth_connection_service_peek());
-      break;
-    case KEY_SHOW_BATTERY:
-      persist_write_int(KEY_SHOW_BATTERY, int_value);
-      update_battery(battery_state_service_peek());
-      break;
-  }
+  persist_write_string(KEY_TAG, string_value);
+  update_quote();
 }
 
 void create_bt_layer(Window *window) {
@@ -178,7 +150,6 @@ static void main_window_load(Window *window) {
 }
 
 static void main_window_unload(Window *window) {
-  // Destroy TextLayer
   text_layer_destroy(s_bt_layer);
   text_layer_destroy(s_time_layer);
   text_layer_destroy(s_battery_layer);
