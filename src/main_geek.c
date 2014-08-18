@@ -19,27 +19,11 @@
 
 // Create Window, Time and Quote
 static Window *s_main_window;
-static TextLayer *s_bt_layer, *s_time_layer, *s_battery_layer, *s_quote_layer;
-enum {
-  KEY_TAG = 0,
-  KEY_WIP = 1,
-  KEY_SHOW_BT = 2,
-  KEY_SHOW_BATTERY = 3,
-};
-
-static void update_bt(bool connected) {
-  text_layer_set_text(s_bt_layer, connected ? "BT ON" : "BT OFF");
-}
-
-static void update_battery(BatteryChargeState charge_state) {
-  char *string_battery = "100%";
-  if (charge_state.is_charging) {
-    string_battery = "Charging";
-  } else {
-    snprintf(string_battery, 40, "%d%%", charge_state.charge_percent);
-  }
-  text_layer_set_text(s_battery_layer, string_battery);
-}
+static TextLayer *s_bt_layer;
+static TextLayer *s_time_layer;
+static TextLayer *s_battery_layer;
+static TextLayer *s_tag_layer;
+char *tag;
 
 static void update_time() {
   // Get a tm structure
@@ -62,18 +46,22 @@ static void update_time() {
   text_layer_set_text(s_time_layer, buffer);
 }
 
-static void update_quote() {
-    char *string_quote = "WIP";
-    persist_read_string(KEY_TAG, string_quote, 40);
-    text_layer_set_text(s_quote_layer, string_quote);
+static void update_tag(char *string_tag) {
+  text_layer_set_text(s_tag_layer, string_tag);
 }
 
-void process_tuple(Tuple *t)
-{
-  int key = t->key;
-  char *string_value = t->value->cstring;
-  persist_write_string(KEY_TAG, string_value);
-  update_quote();
+static void update_bt(bool connected) {
+  text_layer_set_text(s_bt_layer, connected ? "BT ON" : "BT OFF");
+}
+
+static void update_battery(BatteryChargeState charge_state) {
+  static char *string_battery = "100%";
+  if (charge_state.is_charging) {
+    string_battery = "Charging";
+  } else {
+    snprintf(string_battery, sizeof(string_battery), "%d%%", charge_state.charge_percent);
+  }
+  text_layer_set_text(s_battery_layer, string_battery);
 }
 
 void create_bt_layer(Window *window) {
@@ -81,7 +69,6 @@ void create_bt_layer(Window *window) {
   s_bt_layer = text_layer_create(GRect(7, 0, 137, 50));
   text_layer_set_background_color(s_bt_layer, GColorClear);
   text_layer_set_text_color(s_bt_layer, GColorBlack);
-  update_bt(bluetooth_connection_service_peek());
 
   // Improve the layout to be more like a watchface
   text_layer_set_font(s_bt_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18)); //TODO: Themes
@@ -96,7 +83,6 @@ void create_battery_layer(Window *window) {
   s_battery_layer = text_layer_create(GRect(0, 0, 137, 50));
   text_layer_set_background_color(s_battery_layer, GColorClear);
   text_layer_set_text_color(s_battery_layer, GColorBlack);
-  update_battery(battery_state_service_peek());
 
   // Improve the layout to be more like a watchface
   text_layer_set_font(s_battery_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18)); //TODO: Themes
@@ -119,24 +105,24 @@ void create_time_layer(Window *window) {
 
   // Add it as a child layer to the Window's root layer
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
-  
-  // Make sure the time is displayed from the start
+
   update_time();
 }
 
-void create_quote_layer(Window *window) {
+void create_tag_layer(Window *window) {
   // Create time TextLayer
-  s_quote_layer = text_layer_create(GRect(0, 95, 144, 50));
-  text_layer_set_background_color(s_quote_layer, GColorClear);
-  text_layer_set_text_color(s_quote_layer, GColorBlack);
-  text_layer_set_text(s_quote_layer, "May The Force Be With You");
+  s_tag_layer = text_layer_create(GRect(0, 95, 144, 50));
+  text_layer_set_background_color(s_tag_layer, GColorClear);
+  text_layer_set_text_color(s_tag_layer, GColorBlack);
 
   // Improve the layout to be more like a watchface
-  text_layer_set_font(s_quote_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24)); //TODO: Themes
-  text_layer_set_text_alignment(s_quote_layer, GTextAlignmentCenter); //TODO: Themes
+  text_layer_set_font(s_tag_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24)); //TODO: Themes
+  text_layer_set_text_alignment(s_tag_layer, GTextAlignmentCenter); //TODO: Themes
 
   // Add it as a child layer to the Window's root layer
-  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_quote_layer));
+  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_tag_layer));
+
+  tag = "May The Force Be With You";
 }
 
 // Load and Unload
@@ -144,25 +130,22 @@ static void main_window_load(Window *window) {
   create_bt_layer(window);
   create_time_layer(window);
   create_battery_layer(window);
-  create_quote_layer(window);
+  create_tag_layer(window);
 }
 
 static void main_window_unload(Window *window) {
   text_layer_destroy(s_bt_layer);
   text_layer_destroy(s_time_layer);
   text_layer_destroy(s_battery_layer);
-  text_layer_destroy(s_quote_layer);
+  text_layer_destroy(s_tag_layer);
 }
 
 static void in_received_handler(DictionaryIterator *iter, void *context) {
-  (void) context;
-  //Get data
   Tuple *t = dict_read_first(iter);
-  while(t != NULL)
+  if(t)
   {
-    process_tuple(t);
-    //Get next
-    t = dict_read_next(iter);
+    tag = t->value->cstring;
+    update_tag(tag);
   }
 }
 
@@ -170,7 +153,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_bt(bluetooth_connection_service_peek());
   update_battery(battery_state_service_peek());
   update_time();
-  update_quote();
+  update_tag(tag);
 }
 
 static void init() {
