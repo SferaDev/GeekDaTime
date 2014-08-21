@@ -20,7 +20,7 @@
 // Create Window, Time and Quote
 static Window *s_main_window;
 static TextLayer *s_time_layer, *s_bt_layer, *s_battery_layer, *s_tag_layer;
-char *tag;
+char tag[100];
 enum {
   KEY_TAG = 0,
 };
@@ -48,11 +48,12 @@ static void update_time() {
 
 static void update_tag() {
   if (persist_exists(KEY_TAG) == true) {
-    persist_read_string(KEY_TAG, tag, 40);
+    persist_read_string(KEY_TAG, tag, 100);
+    text_layer_set_text(s_tag_layer, tag);
   } else {
-    tag = "Persist failed while reading";
+    text_layer_set_text(s_tag_layer, "May The Force Be With You");
   }
-  text_layer_set_text(s_tag_layer, tag);
+  
 }
 
 static void update_bt(bool connected) {
@@ -123,12 +124,12 @@ void create_time_layer(Window *window) {
 
 void create_tag_layer(Window *window) {
   // Create time TextLayer
-  s_tag_layer = text_layer_create(GRect(0, 95, 144, 50));
+  s_tag_layer = text_layer_create(GRect(0, 90, 144, 70));
   text_layer_set_background_color(s_tag_layer, GColorClear);
   text_layer_set_text_color(s_tag_layer, GColorBlack);
 
   // Improve the layout to be more like a watchface
-  text_layer_set_font(s_tag_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24)); //TODO: Themes
+  text_layer_set_font(s_tag_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18)); //TODO: Themes
   text_layer_set_text_alignment(s_tag_layer, GTextAlignmentCenter); //TODO: Themes
 
   // Add it as a child layer to the Window's root layer
