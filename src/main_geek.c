@@ -20,7 +20,7 @@
 // Create Window, Time and Quote
 static Window *s_main_window;
 static TextLayer *s_time_layer, *s_bt_layer, *s_battery_layer, *s_tag_layer;
-char tag[40];
+char *tag;
 enum {
   KEY_TAG = 0,
 };
@@ -49,6 +49,8 @@ static void update_time() {
 static void update_tag() {
   if (persist_exists(KEY_TAG) == true) {
     persist_read_string(KEY_TAG, tag, 40);
+  } else {
+    tag = "Persist failed while reading";
   }
   text_layer_set_text(s_tag_layer, tag);
 }
@@ -69,6 +71,7 @@ static void update_battery(BatteryChargeState charge_state) {
 
 void doMagicalStuff(Tuple *t) {
   char *string_value = t->value->cstring;
+  persist_delete(KEY_TAG);
   persist_write_string(KEY_TAG, string_value);
   update_tag();
 }
