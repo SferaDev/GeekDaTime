@@ -124,7 +124,7 @@ void create_time_layer(Window *window) {
 
 void create_tag_layer(Window *window) {
   // Create time TextLayer
-  s_tag_layer = text_layer_create(GRect(0, 90, 144, 70));
+  s_tag_layer = text_layer_create(GRect(0, 90, 134, 70));
   text_layer_set_background_color(s_tag_layer, GColorClear);
   text_layer_set_text_color(s_tag_layer, GColorBlack);
 
