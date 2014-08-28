@@ -51,7 +51,7 @@ static void update_tag() {
     persist_read_string(KEY_TAG, tag, 100);
     text_layer_set_text(s_tag_layer, tag);
   } else {
-    text_layer_set_text(s_tag_layer, "May The Force Be With You");
+    text_layer_set_text(s_tag_layer, "May The Force Be With You All");
   }
   
 }
@@ -124,7 +124,7 @@ void create_time_layer(Window *window) {
 
 void create_tag_layer(Window *window) {
   // Create time TextLayer
-  s_tag_layer = text_layer_create(GRect(0, 90, 134, 70));
+  s_tag_layer = text_layer_create(GRect(0, 90, 144, 70));
   text_layer_set_background_color(s_tag_layer, GColorClear);
   text_layer_set_text_color(s_tag_layer, GColorBlack);
 
