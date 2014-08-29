@@ -163,7 +163,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_bt(bluetooth_connection_service_peek());
   update_battery(battery_state_service_peek());
   update_time();
-  update_tag(tag);
+  update_tag();
 }
 
 static void init() {
