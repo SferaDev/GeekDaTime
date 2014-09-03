@@ -84,8 +84,8 @@ void create_bt_layer(Window *window) {
   text_layer_set_text_color(s_bt_layer, GColorBlack);
 
   // Improve the layout to be more like a watchface
-  text_layer_set_font(s_bt_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18)); //TODO: Themes
-  text_layer_set_text_alignment(s_bt_layer, GTextAlignmentLeft); //TODO: Themes
+  text_layer_set_font(s_bt_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+  text_layer_set_text_alignment(s_bt_layer, GTextAlignmentLeft);
 
   // Add it as a child layer to the Window's root layer
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_bt_layer));
@@ -98,8 +98,8 @@ void create_battery_layer(Window *window) {
   text_layer_set_text_color(s_battery_layer, GColorBlack);
 
   // Improve the layout to be more like a watchface
-  text_layer_set_font(s_battery_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18)); //TODO: Themes
-  text_layer_set_text_alignment(s_battery_layer, GTextAlignmentRight); //TODO: Themes
+  text_layer_set_font(s_battery_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+  text_layer_set_text_alignment(s_battery_layer, GTextAlignmentRight);
 
   // Add it as a child layer to the Window's root layer
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_battery_layer));
@@ -113,8 +113,8 @@ void create_time_layer(Window *window) {
   text_layer_set_text(s_time_layer, "00:00");
 
   // Improve the layout to be more like a watchface
-  text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_LIGHT)); //TODO:Themes
-  text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter); //TODO: Themes
+  text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_LIGHT));
+  text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
 
   // Add it as a child layer to the Window's root layer
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
@@ -129,8 +129,8 @@ void create_tag_layer(Window *window) {
   text_layer_set_text_color(s_tag_layer, GColorBlack);
 
   // Improve the layout to be more like a watchface
-  text_layer_set_font(s_tag_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18)); //TODO: Themes
-  text_layer_set_text_alignment(s_tag_layer, GTextAlignmentCenter); //TODO: Themes
+  text_layer_set_font(s_tag_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+  text_layer_set_text_alignment(s_tag_layer, GTextAlignmentCenter);
 
   // Add it as a child layer to the Window's root layer
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_tag_layer));
